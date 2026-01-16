@@ -3,7 +3,8 @@ import type { Metadata } from "next"
 
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { Navigation } from "@/components/navigation"
+import { AppShell } from "@/components/layout/app-shell"
+
 import { Plus_Jakarta_Sans, IBM_Plex_Mono, Lora, Plus_Jakarta_Sans as V0_Font_Plus_Jakarta_Sans, IBM_Plex_Mono as V0_Font_IBM_Plex_Mono, Lora as V0_Font_Lora } from 'next/font/google'
 
 // Initialize fonts
@@ -57,10 +58,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${plusJakartaSans.variable} ${ibmPlexMono.variable} ${lora.variable} font-sans antialiased`}>
-        <div className="flex h-screen overflow-hidden">
-          <Navigation />
-          <main className="flex-1 overflow-hidden">{children}</main>
-        </div>
+        <AppShell>{children}</AppShell>
         <Analytics />
       </body>
     </html>
