@@ -17,6 +17,7 @@ export interface Provider {
   languages: any[]
   billingAddress: Address[]
   address: Address[]
+  wheelChairAccess: boolean
 }
 
 export interface BasicInfo {
@@ -114,6 +115,7 @@ export interface Address {
   pcp_panel: string | null
   payerDirectory: string | null
   wheelChairAccess: boolean
+  locationStatus: string[]
   externalID: string
   id: number
   fullAddress?: string
@@ -140,12 +142,15 @@ export interface FilterState {
   specialtyIds: number[]
   genderTypeIds: number[]
   stateIds: number[]
-  locationStatus: string[]
-  wheelChairAccess: string[]
+  schoolNames: string[]
+  locationStatus: boolean
+  wheelChairAccess: boolean
 }
 
 export interface FilterConfig {
   category: string
+  control_type?: "checkbox" | "dropdown" // UI control type
+  is_required?: boolean // Indicate if filter is required
   filter_columns: FilterColumn[]
 }
 

@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useMemo } from "react"
-import { mockProviderData, mockFilterConfig, mockFieldConfig } from "@/lib/provider-mock-data"
+import { useState, useMemo, useCallback } from "react"
+import { mockFilterConfig, mockFieldConfig } from "@/lib/provider-mock-data"
+import { mockProviderData } from "@/lib/mock-provider-data"
 import type { Provider, FilterState, FieldConfig } from "@/lib/provider-types"
 import { useGlobalSearch, HighlightText } from "@/components/layout/app-shell"
 import {
@@ -16,16 +17,21 @@ import {
   Edit,
   Trash2,
   Check,
+  Filter,
 } from "lucide-react"
 import { ProviderEditDrawer } from "@/components/providers/provider-edit-drawer"
 import { FilterPopup } from "@/components/providers/filter-popup"
+import { AddProviderModal } from "@/components/providers/add-provider-modal"
+import { AdvancedFilterBuilder, applyFilterRules, type FilterRule } from "@/components/providers/advanced-filter-builder"
+import { DeleteConfirmation } from "@/components/providers/provider-edit-drawer/confirmation-dialog"
 
 export default function ProvidersPage() {
   const { globalSearch } = useGlobalSearch()
-  const [providers] = useState<Provider[]>(mockProviderData)
+  const [providers, setProviders] = useState<Provider[]>(mockProviderData)
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [localSearch, setLocalSearch] = useState("")
   const [filterState, setFilterState] = useState<FilterState>({
     search: "",
@@ -33,14 +39,22 @@ export default function ProvidersPage() {
     specialtyIds: [],
     genderTypeIds: [],
     stateIds: [],
-    locationStatus: [],
-    wheelChairAccess: [],
+    schoolNames: [],
+    locationStatus: false,
+    wheelChairAccess: false,
   })
+  const [advancedFilterRules, setAdvancedFilterRules] = useState<FilterRule[]>([])
   const [fieldConfig] = useState<FieldConfig[]>(mockFieldConfig)
   const [selectedRows, setSelectedRows] = useState<number[]>([])
 
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean
+    provider: Provider | null
+  }>({ isOpen: false, provider: null })
+
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(25)
+  const [pageSize, setPageSize] = useState(10)
 
   // Combine global and local search
   const searchTerm = globalSearch || localSearch
@@ -82,6 +96,23 @@ export default function ProvidersPage() {
         if (!hasState) return false
       }
 
+      // School name filter
+      if (filterState.schoolNames.length > 0) {
+        const hasSchool = provider.educations.some((edu) => filterState.schoolNames.includes(edu.schoolName))
+        if (!hasSchool) return false
+      }
+
+      // Location status filter
+      if (filterState.locationStatus) {
+        const hasActiveLocation = provider.address.some((addr) => (addr.locationStatus || ["Active"]).includes("Active"))
+        if (!hasActiveLocation) return false
+      }
+
+      // Wheelchair access filter
+      if (filterState.wheelChairAccess) {
+        if (!provider.wheelChairAccess) return false
+      }
+
       return true
     })
   }, [providers, searchTerm, filterState])
@@ -96,38 +127,68 @@ export default function ProvidersPage() {
     setCurrentPage(1)
   }, [filterState, searchTerm])
 
-  const handleProviderUpdate = (updatedProvider: Provider) => {
-    console.log("[v0] Provider updated:", updatedProvider)
+  const handleProviderUpdate = useCallback((updatedProvider: Provider) => {
+    setProviders((prev) =>
+      prev.map((p) => (p.provider_Id === updatedProvider.provider_Id ? updatedProvider : p))
+    )
     setSelectedProvider(null)
     setIsDrawerOpen(false)
-  }
+  }, [])
 
-  const handleEditProvider = (provider: Provider) => {
+  const handleEditProvider = useCallback((provider: Provider) => {
     setSelectedProvider(provider)
     setIsDrawerOpen(true)
-  }
+  }, [])
 
-  const handleRowSelect = (providerId: number) => {
+  const handleAddProvider = useCallback((newProvider: Provider) => {
+    setProviders((prev) => [newProvider, ...prev])
+  }, [])
+
+  const handleDeleteProvider = useCallback((provider: Provider) => {
+    setDeleteConfirm({ isOpen: true, provider })
+  }, [])
+
+  const handleConfirmDelete = useCallback(() => {
+    if (deleteConfirm.provider) {
+      setProviders((prev) =>
+        prev.filter((p) => p.provider_Id !== deleteConfirm.provider!.provider_Id)
+      )
+      setSelectedRows((prev) =>
+        prev.filter((id) => id !== deleteConfirm.provider!.provider_Id)
+      )
+    }
+    setDeleteConfirm({ isOpen: false, provider: null })
+  }, [deleteConfirm.provider])
+
+  const handleRowSelect = useCallback((providerId: number) => {
     setSelectedRows((prev) =>
       prev.includes(providerId) ? prev.filter((id) => id !== providerId) : [...prev, providerId],
     )
-  }
+  }, [])
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedRows.length === paginatedProviders.length) {
       setSelectedRows([])
     } else {
       setSelectedRows(paginatedProviders.map((p) => p.provider_Id))
     }
-  }
+  }, [selectedRows.length, paginatedProviders])
+
+  const handleBulkDelete = useCallback(() => {
+    if (selectedRows.length > 0 && window.confirm(`Delete ${selectedRows.length} selected providers?`)) {
+      setProviders((prev) => prev.filter((p) => !selectedRows.includes(p.provider_Id)))
+      setSelectedRows([])
+    }
+  }, [selectedRows])
 
   const activeFilterCount =
     filterState.healthPlanIds.length +
     filterState.specialtyIds.length +
     filterState.genderTypeIds.length +
     filterState.stateIds.length +
-    filterState.locationStatus.length +
-    filterState.wheelChairAccess.length
+    filterState.schoolNames.length +
+    (filterState.locationStatus ? 1 : 0) +
+    (filterState.wheelChairAccess ? 1 : 0)
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -149,7 +210,10 @@ export default function ProvidersPage() {
               <Download className="w-4 h-4" />
               Export
             </button>
-            <button className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors">
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors"
+            >
               <Plus className="w-4 h-4" />
               Add Provider
             </button>
@@ -204,6 +268,16 @@ export default function ProvidersPage() {
               />
             )}
           </div>
+
+          {selectedRows.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Selected ({selectedRows.length})
+            </button>
+          )}
 
           <div className="flex items-center gap-2 ml-auto text-sm text-gray-500">
             <span>Show</span>
@@ -379,6 +453,7 @@ export default function ProvidersPage() {
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
+                              onClick={() => handleDeleteProvider(provider)}
                               className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                               title="Delete provider"
                             >
@@ -482,6 +557,26 @@ export default function ProvidersPage() {
           onSave={handleProviderUpdate}
         />
       )}
+
+      {/* Add Provider Modal */}
+      <AddProviderModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onAdd={handleAddProvider}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmation
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, provider: null })}
+        onConfirm={handleConfirmDelete}
+        itemType="Provider"
+        itemName={
+          deleteConfirm.provider
+            ? `${deleteConfirm.provider.firstName} ${deleteConfirm.provider.lastName}`
+            : ""
+        }
+      />
     </div>
   )
 }
