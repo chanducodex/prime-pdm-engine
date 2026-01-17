@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Activity,
 } from "lucide-react"
+import LiveUpdated from "@/components/live-updated"
 
 // Dashboard stats
 const stats = [
@@ -132,10 +133,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Welcome back! Here is an overview of your provider data.</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <Activity className="w-4 h-4" />
-          <span>Last updated: Just now</span>
-        </div>
+        <LiveUpdated />
       </div>
 
       {/* Stats Grid */}
