@@ -107,7 +107,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="flex h-screen bg-gray-50 overflow-hidden">
         {/* Sidebar */}
         <aside
-          className={`hidden md:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ${
+          className={`hidden md:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 overflow-hidden ${
             isCollapsed ? "w-16" : "w-64"
           }`}
         >
@@ -116,20 +116,25 @@ export function AppShell({ children }: AppShellProps) {
             className={`flex items-center h-16 px-4 border-b border-gray-200 ${isCollapsed ? "justify-center" : "justify-between"}`}
           >
             {!isCollapsed && (
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">P</span>
-                </div>
-                <div>
-                  <h1 className="text-sm font-bold text-gray-900">PRIME</h1>
-                  <p className="text-[10px] text-gray-500">Provider Engine</p>
-                </div>
+              <div className="flex items-center gap-3">
+                <img
+                  src="https://www.atlassystems.com/hubfs/IT%20Services%20-%20Atlas%20Systems/Atlas%20Systems%20Logo%201-1.jpg"
+                  alt="Atlas Systems Logo"
+                  className="w-8 h-8 rounded-lg object-cover"
+                />
+                <img
+                  src="https://www.atlassystems.com/hubfs/Atlas-2025/prime-logo.svg"
+                  alt="PPC Logo"
+                  className="h-12 w-auto "
+                />
               </div>
             )}
             {isCollapsed && (
-              <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
+              <img
+                src="https://www.atlassystems.com/hubfs/IT%20Services%20-%20Atlas%20Systems/Atlas%20Systems%20Logo%201-1.jpg"
+                alt="Atlas Systems Logo"
+                className="w-8 h-8 rounded-lg object-cover"
+              />
             )}
           </div>
 
@@ -144,11 +149,11 @@ export function AppShell({ children }: AppShellProps) {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group relative h-12 ${
                         isActive
                           ? "bg-violet-50 text-violet-700"
                           : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                      }`}
+                      } ${isCollapsed ? "justify-center px-1 py-3 gap-0" : ""}`}
                       aria-current={isActive ? "page" : undefined}
                       title={isCollapsed ? item.name : undefined}
                     >
@@ -164,7 +169,7 @@ export function AppShell({ children }: AppShellProps) {
                       )}
                       {/* Tooltip for collapsed state */}
                       {isCollapsed && (
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50">
+                        <div className="fixed left-20 ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 pointer-events-none">
                           {item.name}
                         </div>
                       )}
@@ -179,7 +184,9 @@ export function AppShell({ children }: AppShellProps) {
           <div className="border-t border-gray-200 p-2">
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors ${
+                isCollapsed ? "px-2" : "px-3"
+              }`}
               aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {isCollapsed ? (
@@ -206,14 +213,17 @@ export function AppShell({ children }: AppShellProps) {
           }`}
         >
           <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-violet-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">P</span>
-              </div>
-              <div>
-                <h1 className="text-sm font-bold text-gray-900">PRIME</h1>
-                <p className="text-[10px] text-gray-500">Provider Engine</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <img
+                src="https://www.atlassystems.com/hubfs/IT%20Services%20-%20Atlas%20Systems/Atlas%20Systems%20Logo%201-1.jpg"
+                alt="Atlas Systems Logo"
+                className="w-8 h-8 rounded-lg object-cover"
+              />
+              <img
+                src="https://www.atlassystems.com/hubfs/Atlas-2025/prime-logo.svg"
+                alt="PPC Logo"
+                className="h-12 w-auto "
+              />
             </div>
             <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-500 hover:text-gray-700">
               <X className="w-5 h-5" />
@@ -245,7 +255,7 @@ export function AppShell({ children }: AppShellProps) {
         </aside>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Top Header Bar */}
           <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-6">
             {/* Mobile Menu Button */}
@@ -306,7 +316,7 @@ export function AppShell({ children }: AppShellProps) {
           </header>
 
           {/* Page Content */}
-          <main className="flex-1 overflow-auto">{children}</main>
+          <main className="flex-1 overflow-auto overflow-x-hidden">{children}</main>
         </div>
       </div>
     </SearchContext.Provider>
