@@ -17,6 +17,13 @@ interface DocumentsTabProps {
   providerName: string
 }
 
+// Simple unique ID generator to avoid collisions when using timestamps
+let __uniqueIdCounter = 0
+function nextUniqueId(): number {
+  __uniqueIdCounter = (__uniqueIdCounter + 1) % 1000
+  return Date.now() * 1000 + __uniqueIdCounter
+}
+
 // Mock documents for demonstration
 const mockDocuments: Document[] = [
   {
@@ -99,8 +106,8 @@ export function DocumentsTab({ providerId, providerName }: DocumentsTabProps) {
         return
       }
 
-      // Simulate upload progress
-      const uploadId = `${file.name}-${Date.now()}`
+      // Simulate upload progress (use unique ID to avoid collisions)
+      const uploadId = `${file.name}-${nextUniqueId()}`
       setUploadProgress((prev) => ({ ...prev, [uploadId]: 0 }))
 
       const interval = setInterval(() => {
@@ -111,7 +118,7 @@ export function DocumentsTab({ providerId, providerName }: DocumentsTabProps) {
 
             // Add document to list
             const newDoc: Document = {
-              id: Date.now(),
+              id: nextUniqueId(),
               name: file.name,
               type: file.name.split(".").pop()?.toUpperCase() || "FILE",
               size: formatFileSize(file.size),
