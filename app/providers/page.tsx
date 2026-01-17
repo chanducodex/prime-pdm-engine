@@ -18,8 +18,10 @@ import {
   Trash2,
   Check,
   Filter,
+  Eye,
 } from "lucide-react"
 import { ProviderEditDrawer } from "@/components/providers/provider-edit-drawer"
+import { ProviderDetailPanel } from "@/components/providers/provider-detail-panel"
 import { FilterPopup } from "@/components/providers/filter-popup"
 import { AddProviderModal } from "@/components/providers/add-provider-modal"
 import { AdvancedFilterBuilder, applyFilterRules, type FilterRule } from "@/components/providers/advanced-filter-builder"
@@ -30,6 +32,8 @@ export default function ProvidersPage() {
   const [providers, setProviders] = useState<Provider[]>(mockProviderData)
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isViewDrawerOpen, setIsViewDrawerOpen] = useState(false)
+  const [viewProvider, setViewProvider] = useState<Provider | null>(null)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [localSearch, setLocalSearch] = useState("")
@@ -138,6 +142,11 @@ export default function ProvidersPage() {
   const handleEditProvider = useCallback((provider: Provider) => {
     setSelectedProvider(provider)
     setIsDrawerOpen(true)
+  }, [])
+
+  const handleViewProvider = useCallback((provider: Provider) => {
+    setViewProvider(provider)
+    setIsViewDrawerOpen(true)
   }, [])
 
   const handleAddProvider = useCallback((newProvider: Provider) => {
@@ -446,6 +455,13 @@ export default function ProvidersPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
                             <button
+                              onClick={() => handleViewProvider(provider)}
+                              className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="View provider profile"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
                               onClick={() => handleEditProvider(provider)}
                               className="p-2 text-gray-500 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
                               title="Edit provider"
@@ -564,6 +580,17 @@ export default function ProvidersPage() {
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddProvider}
       />
+
+      {/* View Provider Profile Drawer */}
+      {isViewDrawerOpen && viewProvider && (
+        <ProviderDetailPanel
+          provider={viewProvider}
+          onClose={() => {
+            setIsViewDrawerOpen(false)
+            setViewProvider(null)
+          }}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmation
