@@ -17,6 +17,7 @@ import {
   Settings,
   X,
   Menu,
+  RefreshCcw,
 } from "lucide-react"
 
 // Context for global search
@@ -69,6 +70,12 @@ const navItems = [
     href: "/providers",
     icon: Users,
     description: "Manage provider information",
+  },
+  {
+    name: "Payers Exchange",
+    href: "/payers-exchange",
+    icon: RefreshCcw,
+    description: "Track health plan cycles",
   },
   {
     name: "Change History",
