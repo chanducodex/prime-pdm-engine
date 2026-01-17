@@ -142,38 +142,59 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon
-          const colorClasses = {
-            violet: "bg-violet-50 text-violet-600",
-            blue: "bg-blue-50 text-blue-600",
-            amber: "bg-amber-50 text-amber-600",
-            green: "bg-green-50 text-green-600",
+          const gradientClasses = {
+            violet: "bg-gradient-to-br from-violet-50 to-white",
+            blue: "bg-gradient-to-br from-blue-50 to-white",
+            amber: "bg-gradient-to-br from-amber-50 to-white",
+            green: "bg-gradient-to-br from-green-50 to-white",
+          }
+          const decorativeClasses = {
+            violet: "bg-gradient-to-br from-violet-600/10 to-transparent",
+            blue: "bg-gradient-to-br from-blue-600/10 to-transparent",
+            amber: "bg-gradient-to-br from-amber-600/10 to-transparent",
+            green: "bg-gradient-to-br from-green-600/10 to-transparent",
+          }
+          const iconBgClasses = {
+            violet: "bg-violet-100",
+            blue: "bg-blue-100",
+            amber: "bg-amber-100",
+            green: "bg-green-100",
+          }
+          const iconColorClasses = {
+            violet: "text-violet-600",
+            blue: "text-blue-600",
+            amber: "text-amber-600",
+            green: "text-green-600",
+          }
+          const valueColorClasses = {
+            violet: "text-violet-900",
+            blue: "text-blue-900",
+            amber: "text-amber-900",
+            green: "text-green-900",
           }
 
           return (
             <div
               key={stat.label}
-              className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow"
+              className={`rounded-lg bg-card text-card-foreground relative overflow-hidden border-0 shadow-lg ${gradientClasses[stat.color as keyof typeof gradientClasses]}`}
             >
-              <div className="flex items-start justify-between">
-                <div className={`p-2 rounded-lg ${colorClasses[stat.color as keyof typeof colorClasses]}`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div
-                  className={`flex items-center gap-1 text-xs font-medium ${
-                    stat.changeType === "increase" ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {stat.changeType === "increase" ? (
-                    <TrendingUp className="w-3 h-3" />
-                  ) : (
-                    <TrendingDown className="w-3 h-3" />
-                  )}
-                  {stat.change}
+              <div className={`absolute top-0 right-0 w-20 h-20 ${decorativeClasses[stat.color as keyof typeof decorativeClasses]} rounded-bl-full`}></div>
+              <div className="p-6 flex flex-row items-center justify-between space-y-0 pb-2">
+                <div className="tracking-tight text-sm font-medium text-gray-700">{stat.label}</div>
+                <div className={`p-2 ${iconBgClasses[stat.color as keyof typeof iconBgClasses]} rounded-lg`}>
+                  <Icon className={`h-4 w-4 ${iconColorClasses[stat.color as keyof typeof iconColorClasses]}`} />
                 </div>
               </div>
-              <div className="mt-4">
-                <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
-                <p className="text-sm text-gray-500 mt-1">{stat.label}</p>
+              <div className="p-6 pt-0">
+                <div className={`text-2xl font-bold ${valueColorClasses[stat.color as keyof typeof valueColorClasses]}`}>{stat.value}</div>
+                <div className="flex items-center gap-1 mt-1">
+                  {stat.changeType === "increase" ? (
+                    <TrendingUp className="h-3 w-3 text-green-600" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 text-red-600" />
+                  )}
+                  <p className={`text-xs ${stat.changeType === "increase" ? "text-green-600" : "text-red-600"} font-medium`}>{stat.change} from last month</p>
+                </div>
               </div>
             </div>
           )
