@@ -335,7 +335,7 @@ export function ProviderEditDrawer({
 
         {/* Tabs */}
         <div className="border-b border-gray-200 bg-gray-50">
-          <nav className="flex px-6 gap-1 overflow-x-auto">
+          <nav className="flex px-6 gap-1 overflow-x-auto overflow-y-hidden">
             {TAB_CONFIG.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
