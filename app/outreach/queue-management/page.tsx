@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   OutreachQueue,
@@ -45,7 +45,7 @@ import {
 // Main Page Component
 // ============================================================================
 
-export default function ValidationCampaignDashboard() {
+function ValidationCampaignDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editQueueId = searchParams?.get('edit');
@@ -802,5 +802,14 @@ export default function ValidationCampaignDashboard() {
         currentSettings={dashboardSettings}
       />
     </div>
+  );
+}
+
+// Wrapper component with Suspense boundary for useSearchParams
+export default function QueueManagementPage() {
+  return (
+    <Suspense fallback={<div className="flex h-full items-center justify-center bg-gray-50">Loading...</div>}>
+      <ValidationCampaignDashboard />
+    </Suspense>
   );
 }
