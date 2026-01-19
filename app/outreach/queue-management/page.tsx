@@ -146,7 +146,55 @@ function ValidationCampaignDashboard() {
   }, []);
 
   const handleSaveCampaign = useCallback((config: NewCampaignConfig) => {
-    // Create a new queue from the campaign config
+    // Handle Edit Mode - Update existing queue
+    if (drawerMode === 'edit' && selectedQueue) {
+      setDashboard((prev) => {
+        if (!prev) return prev;
+
+        const updatedQueue: OutreachQueue = {
+          ...selectedQueue,
+          queueName: config.campaignName,
+          description: config.description,
+          accountId: config.accountId,
+          accountName: ACCOUNTS.find(a => a.id === config.accountId)?.name || selectedQueue.accountName,
+          cycleId: config.cycleId,
+          cycleName: CYCLES.find(c => c.id === config.cycleId)?.name || selectedQueue.cycleName,
+          priorityTier: config.priorityTier,
+          config: {
+            ...selectedQueue.config,
+            primaryMethod: config.primaryMethod,
+            strategyVersion: config.strategyVersion,
+            maxAttempts: config.maxAttempts,
+            cooldownMinutes: config.cooldownMinutes,
+            slaHours: config.slaHours,
+            callWindowStart: config.callWindowStart,
+            callWindowEnd: config.callWindowEnd,
+            startTime: config.startTime,
+            notes: config.notes,
+            reportAutomation: config.reportAutomation,
+            qaIntegration: config.qaIntegration,
+            callRecording: config.callRecording,
+            performanceMonitoring: config.performanceMonitoring,
+          },
+          assignedQueue: config.assignedQueue,
+          assignedAgentNames: config.assignedAgents || [],
+          lastUpdatedAt: new Date().toISOString(),
+        };
+
+        return {
+          ...prev,
+          queues: prev.queues.map((q) =>
+            q.queueId === selectedQueue.queueId ? updatedQueue : q
+          ),
+        };
+      });
+
+      console.log('Campaign updated:', config);
+      console.log('Updated queue:', selectedQueue.queueId);
+      return;
+    }
+
+    // Handle Create Mode - Create new queue
     const newQueue: OutreachQueue = {
       queueId: `queue-${Date.now()}`,
       queueName: config.campaignName,
@@ -156,12 +204,22 @@ function ValidationCampaignDashboard() {
       accountName: ACCOUNTS.find(a => a.id === config.accountId)?.name || 'Unknown Account',
       cycleId: config.cycleId,
       cycleName: CYCLES.find(c => c.id === config.cycleId)?.name || 'Unknown Cycle',
+      priorityTier: config.priorityTier,
+      description: config.description,
       config: {
         primaryMethod: config.primaryMethod,
         strategyVersion: config.strategyVersion,
         maxAttempts: config.maxAttempts,
         cooldownMinutes: config.cooldownMinutes,
         slaHours: config.slaHours,
+        callWindowStart: config.callWindowStart,
+        callWindowEnd: config.callWindowEnd,
+        startTime: config.startTime,
+        notes: config.notes,
+        reportAutomation: config.reportAutomation,
+        qaIntegration: config.qaIntegration,
+        callRecording: config.callRecording,
+        performanceMonitoring: config.performanceMonitoring,
       },
       stats: {
         totalTasks: config.source.sourceData?.importedProviderCount || 0,
@@ -227,7 +285,7 @@ function ValidationCampaignDashboard() {
 
     console.log('Campaign created:', config);
     console.log('New queue added:', newQueue);
-  }, []);
+  }, [drawerMode, selectedQueue]);
 
   const handlePauseQueue = useCallback((queueId: string) => {
     setDashboard((prev) => {

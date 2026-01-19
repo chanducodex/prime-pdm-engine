@@ -32,6 +32,16 @@ export interface OutreachQueue {
     callWindowEnd?: string;
     startTime?: string;
     notes?: string;
+
+    // Report Automation
+    reportAutomation?: ReportAutomationConfig;
+
+    // QA & Call Monitoring Integration
+    qaIntegration?: QAIntegrationConfig;
+    callRecording?: CallRecordingConfig;
+
+    // Performance Monitoring & Coaching
+    performanceMonitoring?: PerformanceMonitoringConfig;
   };
 
   // Queue Statistics
@@ -204,6 +214,53 @@ export interface CampaignCreationSource {
   }>;
 }
 
+export interface ReportAutomationConfig {
+  enabled: boolean;
+  schedule: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'ON_COMPLETION';
+  recipients?: string[];       // Email addresses for report delivery
+  format: 'PDF' | 'CSV' | 'EXCEL' | 'DASHBOARD_LINK';
+  includeKPIs: boolean;
+  includeAgentPerformance: boolean;
+  includeQASummary: boolean;
+}
+
+export interface QAIntegrationConfig {
+  enabled: boolean;
+  samplingRate: number;        // Percentage of calls to QA review (0-100)
+  requiredQAScoreThreshold?: number; // Minimum QA score for campaign (0-100)
+  assignedQAReviewers?: string[];    // QA leads/reviewers
+  autoFlagLowScore: boolean;   // Auto-flag calls below threshold
+  flagThreshold: number;       // Score threshold for auto-flagging (0-100)
+}
+
+export interface CallRecordingConfig {
+  enabled: boolean;
+  transcriptionEnabled: boolean;
+  sentimentAnalysisEnabled: boolean;
+  retentionDays: number;
+  recordAllCalls: boolean;
+  recordSampledOnly: boolean;  // If false, records based on sampling rate
+}
+
+export interface TestingModeConfig {
+  isTestMode: boolean;
+  stagedRolloutPercentage?: number; // 0-100, for gradual rollout
+  dryRun: boolean;             // Validate without actual execution
+  smokeTest: boolean;          // Enable smoke testing mode
+}
+
+export interface PerformanceMonitoringConfig {
+  enabled: boolean;
+  coachingTriggersEnabled: boolean;
+  performanceThreshold: {
+    contactRateMin?: number;   // Min acceptable contact rate %
+    verificationRateMin?: number; // Min acceptable verification rate %
+    slaBreachMax?: number;     // Max acceptable SLA breach rate %
+    qaScoreMin?: number;       // Min acceptable QA score (0-100)
+  };
+  alertRecipients?: string[];  // Managers/leads to alert
+}
+
 export interface NewCampaignConfig {
   // Basic Information
   campaignName: string;
@@ -235,6 +292,16 @@ export interface NewCampaignConfig {
   // Additional Settings
   startTime?: string;
   notes?: string;
+
+  // Report Automation (From conversation: "All reports should happen systematically")
+  reportAutomation?: ReportAutomationConfig;
+
+  // QA & Call Monitoring Integration
+  qaIntegration?: QAIntegrationConfig;
+  callRecording?: CallRecordingConfig;
+
+  // Performance Monitoring & Coaching
+  performanceMonitoring?: PerformanceMonitoringConfig;
 }
 
 // ----------------------------------------------------------------------------
