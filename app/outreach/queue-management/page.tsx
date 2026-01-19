@@ -510,7 +510,7 @@ function ValidationCampaignDashboard() {
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">New Campaign</span>
-              <span className="sm:inline">New</span>
+              <span className="sm:hidden">New</span>
             </button>
           </div>
         </div>
