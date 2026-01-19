@@ -242,6 +242,3 @@ export const mockFieldConfig: FieldConfig[] = [
     placeholder: "Enter Approval status",
   },
 ]
-
-
-
