@@ -34,11 +34,11 @@ export function TranscriptionPanel({ className = '' }: TranscriptionPanelProps) 
 
   if (!activeCall || activeCall.state === 'IDLE' || activeCall.state === 'ENDED') {
     return (
-      <div className={`bg-white rounded-xl border border-gray-200 p-6 ${className}`}>
-        <div className="flex flex-col items-center justify-center gap-3 text-gray-400 min-h-[300px]">
+      <div className={`bg-white rounded-xl border border-gray-200 flex items-center justify-center ${className}`}>
+        <div className="flex flex-col items-center justify-center gap-3 text-gray-400 p-6">
           <MessageSquare className="w-12 h-12" />
-          <p className="text-sm">No active transcription</p>
-          <p className="text-xs text-gray-400">Transcription will appear during an active call</p>
+          <p className="text-sm text-center">No active transcription</p>
+          <p className="text-xs text-gray-400 text-center">Transcription will appear during an active call</p>
         </div>
       </div>
     );
@@ -46,10 +46,10 @@ export function TranscriptionPanel({ className = '' }: TranscriptionPanelProps) 
 
   if (isTranscriptionLoading) {
     return (
-      <div className={`bg-white rounded-xl border border-gray-200 p-6 ${className}`}>
-        <div className="flex flex-col items-center justify-center gap-3 py-8">
+      <div className={`bg-white rounded-xl border border-gray-200 flex items-center justify-center ${className}`}>
+        <div className="flex flex-col items-center justify-center gap-3 p-6">
           <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
-          <p className="text-sm text-gray-500">Loading transcription...</p>
+          <p className="text-sm text-gray-500 text-center">Loading transcription...</p>
         </div>
       </div>
     );
