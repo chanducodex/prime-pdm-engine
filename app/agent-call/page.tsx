@@ -26,7 +26,7 @@ type DataCollectionMode = 'questionnaire' | 'form';
 
 function AgentCallPageContent() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
-  const [dataMode, setDataMode] = useState<DataCollectionMode>('form');
+  const [dataMode, setDataMode] = useState<DataCollectionMode>('questionnaire');
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
   const { state } = useAgentCall();
 
