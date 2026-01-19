@@ -359,7 +359,7 @@ export function ProviderFormPanel({ provider, isCallActive = false, onSave }: Pr
 
       {/* Tabs */}
       <div className="bg-gray-50/50">
-        <nav className="flex gap-0.5 overflow-x-auto overflow-y-hidden scrollbar-hide px-1">
+        <nav className="flex gap-0.5 overflow-hidden px-1">
           {TAB_CONFIG.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -368,15 +368,15 @@ export function ProviderFormPanel({ provider, isCallActive = false, onSave }: Pr
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`relative flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors shrink-0 rounded-t-lg ${
+                className={`relative flex items-center justify-center gap-1.5 px-2 py-2.5 text-sm font-medium border-b-2 transition-colors rounded-t-lg flex-1 min-w-0 ${
                   isActive
                     ? 'text-violet-700 border-violet-600 bg-white'
                     : 'text-gray-500 border-gray-200 hover:text-gray-700 hover:bg-white/50'
                 }`}
                 title={tab.label}
               >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="hidden md:inline truncate">{tab.label}</span>
               </button>
             );
           })}
