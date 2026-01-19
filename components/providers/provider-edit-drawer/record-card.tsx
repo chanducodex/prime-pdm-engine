@@ -4,7 +4,7 @@ import { Trash2, Plus, GripVertical, ChevronDown, ChevronRight } from "lucide-re
 import { useState } from "react"
 
 interface RecordCardProps {
-  title: string
+  title: any
   subtitle?: string
   children: React.ReactNode
   onDelete?: () => void

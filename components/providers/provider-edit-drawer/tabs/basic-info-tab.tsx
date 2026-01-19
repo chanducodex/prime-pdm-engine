@@ -87,7 +87,7 @@ export function BasicInfoTab({ editState, validationErrors }: BasicInfoTabProps)
   ]
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 ">
       {/* Expansion Controls */}
       <div className="flex justify-end">
         <ExpansionControls onExpandAll={expandAll} onCollapseAll={collapseAll} />

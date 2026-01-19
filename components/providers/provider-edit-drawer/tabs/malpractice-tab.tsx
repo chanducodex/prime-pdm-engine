@@ -82,7 +82,7 @@ export function MalpracticeTab({
 
   if (malpracticeRecords.length === 0) {
     return (
-      <div className="max-w-3xl">
+      <div>
         <EmptyRecordsState
           title="No malpractice insurance records found"
           description="Add malpractice insurance information for this provider"
@@ -94,7 +94,7 @@ export function MalpracticeTab({
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4 ">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900">

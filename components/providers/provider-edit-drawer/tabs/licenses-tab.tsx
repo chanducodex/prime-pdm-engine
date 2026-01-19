@@ -131,7 +131,7 @@ export function LicensesTab({
 
   if (totalLicenses === 0) {
     return (
-      <div className="max-w-3xl space-y-4">
+      <div className=" space-y-4">
         <EmptyRecordsState
           title="No licenses found"
           description="Add DEA or CDS licenses for this provider"
@@ -144,7 +144,7 @@ export function LicensesTab({
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 ">
       {/* Search */}
       <TabSearchBar
         searchTerm={searchTerm}

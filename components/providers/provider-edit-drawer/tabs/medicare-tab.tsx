@@ -81,7 +81,7 @@ export function MedicareTab({
 
   if (medicareRecords.length === 0) {
     return (
-      <div className="max-w-3xl">
+      <div >
         <EmptyRecordsState
           title="No Medicare records found"
           description="Add a Medicare enrollment for this provider"
@@ -93,7 +93,7 @@ export function MedicareTab({
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900">

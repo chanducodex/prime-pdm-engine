@@ -76,7 +76,7 @@ export function SpecialtiesTab({
 
   if (specialties.length === 0) {
     return (
-      <div className="max-w-3xl">
+      <div >
         <EmptyRecordsState
           title="No specialties found"
           description="Add a specialty for this provider"
@@ -88,7 +88,7 @@ export function SpecialtiesTab({
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4 ">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900">
@@ -123,11 +123,13 @@ export function SpecialtiesTab({
           <RecordCard
             key={specialty.id || actualIndex}
             title={
-              searchTerm ? (
-                <HighlightedText text={specialty.name || "Unnamed Specialty"} search={searchTerm} />
-              ) : (
-                specialty.name || "Unnamed Specialty"
-              )
+              (
+                searchTerm ? (
+                  <HighlightedText text={specialty.name || "Unnamed Specialty"} search={searchTerm} />
+                ) : (
+                  specialty.name || "Unnamed Specialty"
+                )
+              ) 
             }
             onDelete={() => onDeleteRecord("specialties", actualIndex, specialty.name)}
             isModified={isSpecModified}

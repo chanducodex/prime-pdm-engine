@@ -87,7 +87,7 @@ export function LocationsTab({
   }
 
   return (
-    <div className="space-y-4 max-w-3xl">
+    <div className="space-y-4 ">
       {/* Header with count and add button */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900">

@@ -20,6 +20,7 @@ import {
   RefreshCcw,
   Megaphone,
   Target,
+  Headphones,
 } from "lucide-react"
 
 // Context for global search
@@ -84,6 +85,12 @@ const navItems = [
     href: "/outreach/queue-management",
     icon: Target,
     description: "Monitor queues and agent performance",
+  },
+  {
+    name: "Agent Call Center",
+    href: "/agent-call",
+    icon: Headphones,
+    description: "Handle live calls with AI assistance",
   },
   {
     name: "Payers Exchange",

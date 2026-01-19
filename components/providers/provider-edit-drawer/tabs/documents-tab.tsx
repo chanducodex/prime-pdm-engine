@@ -183,7 +183,7 @@ export function DocumentsTab({ providerId, providerName }: DocumentsTabProps) {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 ">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-gray-900">
