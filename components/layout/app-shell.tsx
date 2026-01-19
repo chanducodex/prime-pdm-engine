@@ -18,6 +18,8 @@ import {
   X,
   Menu,
   RefreshCcw,
+  Megaphone,
+  Target,
 } from "lucide-react"
 
 // Context for global search
@@ -70,6 +72,18 @@ const navItems = [
     href: "/providers",
     icon: Users,
     description: "Manage provider information",
+  },
+  {
+    name: "Call Monitoring & QA",
+    href: "/outreach",
+    icon: Megaphone,
+    description: "Review call recordings, transcriptions, and quality assurance",
+  },
+  {
+    name: "Queue Management",
+    href: "/outreach/queue-management",
+    icon: Target,
+    description: "Monitor queues and agent performance",
   },
   {
     name: "Payers Exchange",
