@@ -34,6 +34,10 @@ import {
   BarChart2,
   BookOpen,
   Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import type { Provider } from '@/lib/provider-types';
 
@@ -102,6 +106,9 @@ const initialCallbacks: CallbackSchedule[] = [
 // Right column panel type
 type RightPanelExpanded = 'scripts' | 'notes' | null;
 
+// Center column expansion type
+type CenterColumnExpand = 'normal' | 'expand-left' | 'expand-right';
+
 function AgentCallPageContent() {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [isAPIDocsOpen, setIsAPIDocsOpen] = useState(false);
@@ -111,7 +118,23 @@ function AgentCallPageContent() {
   const [showSecondaryPanel, setShowSecondaryPanel] = useState(false);
   const [callbacks, setCallbacks] = useState<CallbackSchedule[]>(initialCallbacks);
   const [expandedRightPanel, setExpandedRightPanel] = useState<RightPanelExpanded>('scripts');
+  const [centerColumnExpand, setCenterColumnExpand] = useState<CenterColumnExpand>('normal');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const { state } = useAgentCall();
+
+  // Handle browser reload confirmation when there are unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   const isCallActive = !!(state.activeCall && state.activeCall.state === 'IN_CALL');
 
@@ -272,42 +295,107 @@ function AgentCallPageContent() {
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-stretch">
 
             {/* Left Column: Transcription + Sentiment (Narrow - 3 cols) */}
-            <div className="xl:col-span-3 flex flex-col gap-4">
-              <div className="flex-1">
-                <TranscriptionPanel className="h-full" />
+            {centerColumnExpand !== 'expand-left' && (
+              <div className={`flex flex-col gap-4 ${centerColumnExpand === 'expand-right' ? 'xl:col-span-3' : 'xl:col-span-3'}`}>
+                <div className="flex-1">
+                  <TranscriptionPanel className="h-full" />
+                </div>
+                {isCallActive && (
+                  <SentimentDashboardPanel isCallActive={isCallActive} />
+                )}
               </div>
-              {isCallActive && (
-                <SentimentDashboardPanel isCallActive={isCallActive} />
-              )}
-            </div>
+            )}
 
-            {/* Center Column: Data Collection - Main Work Area (Wide - 6 cols) */}
-            <div className="xl:col-span-6">
-              {dataMode === 'questionnaire' ? (
-                <QuestionnairePanel className="h-full" />
-              ) : (
-                <ProviderFormPanel
-                  provider={currentProvider}
-                  isCallActive={isCallActive}
-                  onSave={(provider) => {
-                    console.log('Saving provider data:', provider);
-                  }}
-                />
-              )}
+            {/* Center Column: Data Collection - Main Work Area */}
+            <div className={`${
+              centerColumnExpand === 'expand-left' ? 'xl:col-span-9' :
+              centerColumnExpand === 'expand-right' ? 'xl:col-span-9' :
+              'xl:col-span-6'
+            }`}>
+              {/* Center Column Header with Expand Controls */}
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden h-full flex flex-col">
+                <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                  <div className="flex items-center gap-2">
+                    {dataMode === 'questionnaire' ? (
+                      <ListChecks className="w-4 h-4 text-violet-500" />
+                    ) : (
+                      <FileCheck className="w-4 h-4 text-violet-500" />
+                    )}
+                    <span className="text-sm font-medium text-gray-700">
+                      {dataMode === 'questionnaire' ? 'Questionnaire' : 'Provider Form'}
+                    </span>
+                    {hasUnsavedChanges && (
+                      <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                        Unsaved
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {/* Expand Left Button */}
+                    <button
+                      onClick={() => setCenterColumnExpand(centerColumnExpand === 'expand-left' ? 'normal' : 'expand-left')}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        centerColumnExpand === 'expand-left'
+                          ? 'bg-violet-100 text-violet-600'
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                      }`}
+                      title={centerColumnExpand === 'expand-left' ? 'Restore' : 'Expand Left'}
+                    >
+                      {centerColumnExpand === 'expand-left' ? (
+                        <Minimize2 className="w-4 h-4" />
+                      ) : (
+                        <ChevronLeft className="w-4 h-4" />
+                      )}
+                    </button>
+                    {/* Expand Right Button */}
+                    <button
+                      onClick={() => setCenterColumnExpand(centerColumnExpand === 'expand-right' ? 'normal' : 'expand-right')}
+                      className={`p-1.5 rounded-lg transition-colors ${
+                        centerColumnExpand === 'expand-right'
+                          ? 'bg-violet-100 text-violet-600'
+                          : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                      }`}
+                      title={centerColumnExpand === 'expand-right' ? 'Restore' : 'Expand Right'}
+                    >
+                      {centerColumnExpand === 'expand-right' ? (
+                        <Minimize2 className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto">
+                  {dataMode === 'questionnaire' ? (
+                    <QuestionnairePanel className="h-full border-0 rounded-none" />
+                  ) : (
+                    <ProviderFormPanel
+                      provider={currentProvider}
+                      isCallActive={isCallActive}
+                      onSave={(provider) => {
+                        console.log('Saving provider data:', provider);
+                        setHasUnsavedChanges(false);
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
             </div>
 
             {/* Right Column: AI + Scripts + Notes (Narrow - 3 cols) */}
-            <div className="xl:col-span-3 flex flex-col gap-4">
-              <AISuggestionsPanel />
-              <QuickScriptsPanel
-                isExpanded={expandedRightPanel === 'scripts'}
-                onToggleExpand={() => setExpandedRightPanel(expandedRightPanel === 'scripts' ? null : 'scripts')}
-              />
-              <CallNotesPanel
-                isExpanded={expandedRightPanel === 'notes'}
-                onToggleExpand={() => setExpandedRightPanel(expandedRightPanel === 'notes' ? null : 'notes')}
-              />
-            </div>
+            {centerColumnExpand !== 'expand-right' && (
+              <div className={`flex flex-col gap-4 ${centerColumnExpand === 'expand-left' ? 'xl:col-span-3' : 'xl:col-span-3'}`}>
+                <AISuggestionsPanel />
+                <QuickScriptsPanel
+                  isExpanded={expandedRightPanel === 'scripts'}
+                  onToggleExpand={() => setExpandedRightPanel(expandedRightPanel === 'scripts' ? null : 'scripts')}
+                />
+                <CallNotesPanel
+                  isExpanded={expandedRightPanel === 'notes'}
+                  onToggleExpand={() => setExpandedRightPanel(expandedRightPanel === 'notes' ? null : 'notes')}
+                />
+              </div>
+            )}
           </div>
 
          

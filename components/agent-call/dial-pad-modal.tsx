@@ -40,7 +40,7 @@ export function DialPadModal({
   onCall,
   showCallButton = false,
 }: DialPadModalProps) {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState('+');
 
   const handleKeyPress = useCallback(
     (key: string) => {
@@ -56,10 +56,14 @@ export function DialPadModal({
     setInputValue((prev) => prev.slice(0, -1));
   }, []);
 
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  }, []);
+
   const handleCall = useCallback(() => {
-    if (onCall && inputValue) {
+    if (onCall && inputValue && inputValue !== '+') {
       onCall(inputValue);
-      setInputValue('');
+      setInputValue('+');
       onClose();
     }
   }, [onCall, inputValue, onClose]);
@@ -87,11 +91,11 @@ export function DialPadModal({
               <input
                 type="text"
                 value={inputValue}
-                readOnly
-                placeholder="Enter number"
+                onChange={handleInputChange}
+                placeholder="Enter phone number"
                 className="flex-1 bg-transparent text-xl font-mono text-gray-900 outline-none"
               />
-              {inputValue && (
+              {inputValue && inputValue !== '+' && (
                 <button
                   onClick={handleBackspace}
                   className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
@@ -134,7 +138,7 @@ export function DialPadModal({
           <div className="px-4 pb-4">
             <button
               onClick={handleCall}
-              disabled={!inputValue}
+              disabled={!inputValue || inputValue === '+'}
               className="
                 w-full py-3.5 rounded-xl font-medium
                 bg-green-500 hover:bg-green-600 active:bg-green-700

@@ -108,7 +108,7 @@ export function QuestionnairePanel({ className = '' }: QuestionnairePanelProps) 
       </div>
 
       {/* Sections */}
-      <div className="max-h-[700px] overflow-y-auto">
+      <div className="max-h-[950px] overflow-y-auto">
         {questionnaire.sections.map((section) => (
           <SectionAccordion
             key={section.sectionId}
