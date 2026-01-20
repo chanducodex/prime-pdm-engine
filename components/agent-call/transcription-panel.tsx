@@ -34,11 +34,25 @@ export function TranscriptionPanel({ className = '' }: TranscriptionPanelProps) 
 
   if (!activeCall || activeCall.state === 'IDLE' || activeCall.state === 'ENDED') {
     return (
-      <div className={`bg-white rounded-xl border border-gray-200 flex items-center justify-center ${className}`}>
-        <div className="flex flex-col items-center justify-center gap-3 text-gray-400 p-6">
-          <MessageSquare className="w-12 h-12" />
-          <p className="text-sm text-center">No active transcription</p>
-          <p className="text-xs text-gray-400 text-center">Transcription will appear during an active call</p>
+      <div className={`bg-white rounded-xl border border-gray-200 h-full min-h-[400px] ${className}`}>
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-gray-300" />
+          <h3 className="text-sm font-medium text-gray-400">Live Transcription</h3>
+        </div>
+        {/* Empty state content */}
+        <div className="flex flex-col items-center justify-center h-[calc(100%-52px)] p-6">
+          <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+            <MessageSquare className="w-8 h-8 text-gray-300" />
+          </div>
+          <p className="text-sm font-medium text-gray-500 mb-1">No active transcription</p>
+          <p className="text-xs text-gray-400 text-center max-w-[200px]">
+            Real-time transcription will appear here when a call is active
+          </p>
+          <div className="mt-6 flex items-center gap-2 text-xs text-gray-300">
+            <div className="w-2 h-2 rounded-full bg-gray-200" />
+            <span>Waiting for call</span>
+          </div>
         </div>
       </div>
     );

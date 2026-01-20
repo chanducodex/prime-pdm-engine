@@ -288,7 +288,7 @@ export function ProviderFormPanel({ provider, isCallActive = false, onSave }: Pr
   // Empty state when no call is active
   if (!provider) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center justify-center min-h-[500px]">
+      <div className="bg-white rounded-xl border border-gray-200 p-8 flex flex-col items-center justify-center">
         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
           <User className="w-8 h-8 text-gray-400" />
         </div>
@@ -386,7 +386,7 @@ export function ProviderFormPanel({ provider, isCallActive = false, onSave }: Pr
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-6 max-h-[600px] overflow-y-auto">{renderTabContent()}</div>
+      <div className="p-4 sm:p-6 max-h-[950px] overflow-y-auto">{renderTabContent()}</div>
 
       {/* Add Record Modal */}
       <AddRecordModal

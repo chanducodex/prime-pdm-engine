@@ -399,3 +399,175 @@ export interface ApiResponse<T> {
   error?: string;
   message?: string;
 }
+
+// ----------------------------------------------------------------------------
+// Call Quality Metrics
+// ----------------------------------------------------------------------------
+
+export type ConnectionStability = 'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR';
+
+export interface CallQualityMetrics {
+  audioQualityScore: number;
+  networkLatency: number;
+  packetLoss: number;
+  jitter: number;
+  connectionStability: ConnectionStability;
+  timestamp: string;
+}
+
+// ----------------------------------------------------------------------------
+// Sentiment Analysis
+// ----------------------------------------------------------------------------
+
+export type SentimentTrend = 'IMPROVING' | 'STABLE' | 'DECLINING';
+
+export interface SentimentTimelinePoint {
+  timestamp: number;
+  score: number;
+  speaker: 'AGENT' | 'PROVIDER';
+}
+
+export interface SentimentTrigger {
+  text: string;
+  sentiment: 'POSITIVE' | 'NEGATIVE';
+  timestamp: number;
+}
+
+export interface SentimentData {
+  overallScore: number;
+  trend: SentimentTrend;
+  timeline: SentimentTimelinePoint[];
+  triggers: SentimentTrigger[];
+}
+
+// ----------------------------------------------------------------------------
+// Quick Scripts
+// ----------------------------------------------------------------------------
+
+export type ScriptCategory = 'GREETING' | 'COMPLIANCE' | 'VERIFICATION' | 'PROBLEM' | 'CLOSING' | 'ESCALATION';
+
+export interface Script {
+  scriptId: string;
+  category: ScriptCategory;
+  title: string;
+  content: string;
+  variables: string[];
+  shortcut?: string;
+  isFavorite: boolean;
+  usageCount: number;
+}
+
+// ----------------------------------------------------------------------------
+// Recording State
+// ----------------------------------------------------------------------------
+
+export interface RecordingMarker {
+  timestamp: number;
+  label: string;
+}
+
+export interface RecordingState {
+  isRecording: boolean;
+  isPaused: boolean;
+  startedAt?: string;
+  duration: number;
+  markers: RecordingMarker[];
+  complianceDisclaimerPlayed: boolean;
+  recordingId?: string;
+}
+
+// ----------------------------------------------------------------------------
+// Escalation
+// ----------------------------------------------------------------------------
+
+export type SupervisorStatus = 'AVAILABLE' | 'BUSY' | 'OFFLINE';
+export type EscalationLevel = 'P1' | 'P2' | 'P3' | 'P4';
+
+export interface Supervisor {
+  id: string;
+  name: string;
+  status: SupervisorStatus;
+  currentCalls: number;
+  avatar?: string;
+}
+
+export interface EscalationState {
+  availableSupervisors: Supervisor[];
+  selectedSupervisor?: string;
+  escalationLevel: EscalationLevel;
+  reason: string;
+  notes: string;
+  isBeingMonitored: boolean;
+  monitoringSupervisor?: string;
+}
+
+// ----------------------------------------------------------------------------
+// Performance Metrics
+// ----------------------------------------------------------------------------
+
+export interface AgentPerformanceMetrics {
+  callsHandledToday: number;
+  averageHandleTime: number;
+  firstCallResolutionRate: number;
+  customerSatisfactionScore: number;
+  targetGoals: {
+    callsTarget: number;
+    ahtTarget: number;
+    fcrTarget: number;
+    csatTarget: number;
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Knowledge Base
+// ----------------------------------------------------------------------------
+
+export interface KBArticle {
+  articleId: string;
+  title: string;
+  summary: string;
+  content: string;
+  category: string;
+  tags: string[];
+  relevanceScore?: number;
+  lastUpdated: string;
+  viewCount: number;
+}
+
+// ----------------------------------------------------------------------------
+// Callback Scheduling
+// ----------------------------------------------------------------------------
+
+export type CallbackPriority = 'NORMAL' | 'HIGH' | 'URGENT';
+
+export interface CallbackSchedule {
+  callbackId: string;
+  scheduledAt: string;
+  timezone: string;
+  phoneNumber: string;
+  providerId?: string;
+  providerName?: string;
+  reason: string;
+  priority: CallbackPriority;
+  reminderEnabled: boolean;
+  status: 'SCHEDULED' | 'COMPLETED' | 'MISSED' | 'CANCELLED';
+}
+
+// ----------------------------------------------------------------------------
+// Multi-Channel Support
+// ----------------------------------------------------------------------------
+
+export type ChannelType = 'VOICE' | 'EMAIL' | 'CHAT' | 'SMS';
+
+export interface ChannelQueue {
+  count: number;
+  priority: number;
+  oldestItemAge?: number;
+}
+
+export interface ChannelQueues {
+  email: ChannelQueue;
+  chat: ChannelQueue;
+  sms: ChannelQueue;
+  callback: ChannelQueue;
+}

@@ -66,10 +66,21 @@ export function AISuggestionsPanel({ className = '' }: AISuggestionsPanelProps) 
 
   if (!activeCall || activeCall.state === 'IDLE' || activeCall.state === 'ENDED') {
     return (
-      <div className={`bg-white rounded-xl border border-gray-200 p-6 ${className}`}>
-        <div className="flex flex-col items-center justify-center gap-3 py-8 text-gray-400">
-          <Sparkles className="w-12 h-12" />
-          <p className="text-sm">AI suggestions will appear during calls</p>
+      <div className={`bg-white rounded-xl border border-gray-200 h-full min-h-[200px] ${className}`}>
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-gray-300" />
+          <h3 className="text-sm font-medium text-gray-400">AI Suggestions</h3>
+        </div>
+        {/* Empty state content */}
+        <div className="flex flex-col items-center justify-center h-[calc(100%-52px)] p-4">
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-50 to-purple-50 flex items-center justify-center mb-3">
+            <Sparkles className="w-7 h-7 text-gray-300" />
+          </div>
+          <p className="text-sm font-medium text-gray-500 mb-1">AI Assistant Ready</p>
+          <p className="text-xs text-gray-400 text-center max-w-[200px]">
+            Smart suggestions will appear during active calls
+          </p>
         </div>
       </div>
     );

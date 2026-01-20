@@ -37,10 +37,38 @@ export function QuestionnairePanel({ className = '' }: QuestionnairePanelProps) 
 
   if (!activeCall || activeCall.state === 'IDLE' || activeCall.state === 'ENDED') {
     return (
-      <div className={`bg-white rounded-xl border border-gray-200 p-6 ${className}`}>
-        <div className="flex flex-col items-center justify-center gap-3 text-gray-400 min-h-[300px]">
-          <ClipboardList className="w-12 h-12" />
-          <p className="text-sm">Questionnaire will appear during calls</p>
+      <div className={`bg-white rounded-xl border border-gray-200 h-full min-h-[500px] ${className}`}>
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4 text-gray-300" />
+              <h3 className="text-sm font-medium text-gray-400">Auto-Fill Questionnaire</h3>
+            </div>
+            <span className="text-xs text-gray-300">0% complete</span>
+          </div>
+          <div className="mt-2 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-full bg-gray-200 w-0" />
+          </div>
+        </div>
+        {/* Empty state content */}
+        <div className="flex flex-col items-center justify-center h-[calc(100%-80px)] p-6">
+          <div className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+            <ClipboardList className="w-10 h-10 text-gray-300" />
+          </div>
+          <p className="text-sm font-medium text-gray-500 mb-1">Ready for data collection</p>
+          <p className="text-xs text-gray-400 text-center max-w-[280px] mb-4">
+            Start a call to collect and verify provider information with AI-assisted auto-fill
+          </p>
+          {/* Preview sections */}
+          <div className="w-full max-w-[300px] space-y-2 mt-4">
+            {['Contact Information', 'Practice Details', 'License & Credentials'].map((section, i) => (
+              <div key={i} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
+                <span className="text-xs text-gray-400">{section}</span>
+                <div className="w-12 h-1.5 bg-gray-200 rounded-full" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
