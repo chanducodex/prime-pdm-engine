@@ -21,6 +21,7 @@ import {
   Megaphone,
   Target,
   Headphones,
+  ShieldCheck,
 } from "lucide-react"
 
 // Context for global search
@@ -73,6 +74,12 @@ const navItems = [
     href: "/providers",
     icon: Users,
     description: "Manage provider information",
+  },
+  {
+    name: "Credentialing (CaaS)",
+    href: "/credentialing",
+    icon: ShieldCheck,
+    description: "Provider credentialing & verification",
   },
   {
     name: "Call Monitoring & QA",
