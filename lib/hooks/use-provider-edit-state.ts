@@ -18,7 +18,7 @@ import {
  */
 export function useProviderEditState(initialProvider: Provider): ProviderEditState {
   // Track original state (deep clone on mount)
-  const [originalProvider] = useState<Provider>(() => deepClone(initialProvider))
+  const [originalProvider, setOriginalProvider] = useState<Provider>(() => deepClone(initialProvider))
   const [editedProvider, setEditedProvider] = useState<Provider>(() => deepClone(initialProvider))
 
   // Calculate modified fields
@@ -134,6 +134,11 @@ export function useProviderEditState(initialProvider: Provider): ProviderEditSta
     })
   }, [])
 
+  // Mark current edited state as saved (updates originalProvider to match editedProvider)
+  const markAsSaved = useCallback(() => {
+    setOriginalProvider(deepClone(editedProvider))
+  }, [editedProvider])
+
   return {
     editedProvider,
     originalProvider,
@@ -146,6 +151,7 @@ export function useProviderEditState(initialProvider: Provider): ProviderEditSta
     isDirty: modifiedFields.size > 0,
     addArrayItem,
     removeArrayItem,
+    markAsSaved,
   }
 }
 

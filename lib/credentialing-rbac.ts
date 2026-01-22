@@ -1,6 +1,7 @@
 // Role-Based Access Control for Credentialing Module
 
 export enum CredentialingRole {
+  PROVIDER = "provider", // Provider portal users
   COORDINATOR = "coordinator",
   SPECIALIST = "specialist",
   ANALYST = "analyst",
@@ -56,6 +57,12 @@ export enum CredentialingAction {
 
 // Permission matrix: Role -> Allowed Actions
 const ROLE_PERMISSIONS: Record<CredentialingRole, CredentialingAction[]> = {
+  [CredentialingRole.PROVIDER]: [
+    CredentialingAction.VIEW_APPLICATIONS,
+    CredentialingAction.VIEW_DOCUMENTS,
+    CredentialingAction.UPLOAD_DOCUMENTS, // Can upload/reupload their own documents
+  ],
+
   [CredentialingRole.COORDINATOR]: [
     CredentialingAction.VIEW_APPLICATIONS,
     CredentialingAction.VIEW_DOCUMENTS,
@@ -81,6 +88,7 @@ const ROLE_PERMISSIONS: Record<CredentialingRole, CredentialingAction[]> = {
     CredentialingAction.REASSIGN,
     CredentialingAction.EDIT_APPLICATION,
     CredentialingAction.EXPORT_REPORT,
+    
   ],
 
   [CredentialingRole.ANALYST]: [
@@ -141,6 +149,9 @@ const ROLE_PERMISSIONS: Record<CredentialingRole, CredentialingAction[]> = {
     CredentialingAction.VIEW_DOCUMENTS,
     CredentialingAction.VIEW_PSV,
     CredentialingAction.VIEW_SANCTIONS,
+    CredentialingAction.APPROVE_DOCUMENTS,
+    CredentialingAction.REJECT_DOCUMENTS,
+    CredentialingAction.REQUEST_REUPLOAD,
     CredentialingAction.SUBMIT_REVIEW,
     CredentialingAction.FINAL_APPROVE,
     CredentialingAction.FINAL_DENY,
@@ -177,6 +188,7 @@ export const hasAnyPermission = (user: UserContext, actions: CredentialingAction
 // Get user's role display name
 export const getRoleDisplayName = (role: CredentialingRole): string => {
   const names: Record<CredentialingRole, string> = {
+    [CredentialingRole.PROVIDER]: "Provider",
     [CredentialingRole.COORDINATOR]: "Credentialing Coordinator",
     [CredentialingRole.SPECIALIST]: "Credentialing Specialist",
     [CredentialingRole.ANALYST]: "Credentialing Analyst",
@@ -195,7 +207,7 @@ export const getMockUser = (): UserContext => {
     userId: "user-001",
     name: "Sarah Lee",
     email: "sarah.lee@hospital.com",
-    role: CredentialingRole.COMMITTEE_CHAIR, // Change this to test different roles
+    role: CredentialingRole.SPECIALIST, // Change this to test different roles
     department: "Credentialing Services",
   }
 }

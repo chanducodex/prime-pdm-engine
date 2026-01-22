@@ -1,13 +1,13 @@
 // Workflow management for credentialing applications
 
-import type { CredentialingApplication, ApplicationStatus } from "./credentialing-types"
+import type { CredentialingApplication, CredentialingStatus } from "./credentialing-types"
 import { CredentialingAction, type UserContext, hasPermission } from "./credentialing-rbac"
 
 export interface WorkflowAction {
   id: string
   label: string
   description: string
-  nextStatus: ApplicationStatus
+  nextStatus: CredentialingStatus
   requiredPermission: CredentialingAction
   variant: "primary" | "secondary" | "success" | "danger" | "warning"
   confirmMessage?: string
@@ -174,8 +174,8 @@ export const getAvailableWorkflowActions = (
 }
 
 // Get status display info
-export const getStatusDisplayInfo = (status: ApplicationStatus) => {
-  const statusInfo: Record<ApplicationStatus, { label: string; color: string; icon: string }> = {
+export const getStatusDisplayInfo = (status: CredentialingStatus) => {
+  const statusInfo: Record<CredentialingStatus, { label: string; color: string; icon: string }> = {
     not_started: { label: "Not Started", color: "gray", icon: "circle" },
     documents_pending: { label: "Documents Pending", color: "amber", icon: "clock" },
     documents_received: { label: "Documents Received", color: "blue", icon: "file" },
@@ -186,6 +186,8 @@ export const getStatusDisplayInfo = (status: ApplicationStatus) => {
     approved: { label: "Approved", color: "green", icon: "check" },
     denied: { label: "Denied", color: "red", icon: "x" },
     conditional_approval: { label: "Conditional Approval", color: "orange", icon: "alert" },
+    deferred: { label: "Deferred", color: "yellow", icon: "pause" },
+    expired: { label: "Expired", color: "red", icon: "clock-alert" },
     recredentialing_due: { label: "Re-credentialing Due", color: "orange", icon: "refresh" },
   }
   return statusInfo[status] || statusInfo.not_started

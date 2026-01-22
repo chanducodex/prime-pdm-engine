@@ -5,13 +5,8 @@ import type { CredentialingApplication } from "@/lib/credentialing-types"
 import {
   X,
   FileText,
-  ShieldCheck,
-  Users,
-  RefreshCcw,
-  CheckCircle,
   AlertTriangle,
   Clock,
-  Activity,
   Building2,
   Award,
   Stethoscope,
@@ -25,24 +20,39 @@ import { SanctionsScreeningTab } from "./sanctions-screening-tab"
 import { CommitteeReviewTab } from "./committee-review-tab"
 import { RecredentialingCycleTab } from "./recredentialing-cycle-tab"
 import { WorkflowActionBar } from "./workflow-action-bar"
-import { getMockUser, getRoleDisplayName } from "@/lib/credentialing-rbac"
+import { getMockUser, getRoleDisplayName, type UserContext } from "@/lib/credentialing-rbac"
+import {
+  getDrawerViewMode,
+  getDrawerConfig,
+  getVisibleTabs,
+  type TabId,
+  type DrawerViewMode,
+} from "./drawer-tab-config"
 
 interface CredentialingDetailDrawerProps {
   application: CredentialingApplication
   onClose: () => void
   onUpdate?: (application: CredentialingApplication) => void
+  /** Override the user context (useful for provider portal) */
+  userOverride?: UserContext
+  /** Force a specific view mode (useful for testing) */
+  viewModeOverride?: DrawerViewMode
 }
-
-type TabId = "status" | "documents" | "psv" | "sanctions" | "committee" | "recredentialing"
 
 export function CredentialingDetailDrawer({
   application,
   onClose,
   onUpdate,
+  userOverride,
+  viewModeOverride,
 }: CredentialingDetailDrawerProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("status")
+  const currentUser = userOverride || getMockUser() // In production, get from auth context
+  const viewMode = viewModeOverride || getDrawerViewMode(currentUser.role)
+  const drawerConfig = getDrawerConfig(viewMode)
+  const visibleTabs = getVisibleTabs(viewMode)
+
+  const [activeTab, setActiveTab] = useState<TabId>(drawerConfig.defaultTab)
   const [localApplication, setLocalApplication] = useState(application)
-  const currentUser = getMockUser() // In production, get from auth context
 
   const handleApplicationUpdate = (updatedApp: CredentialingApplication) => {
     setLocalApplication(updatedApp)
@@ -71,50 +81,11 @@ export function CredentialingDetailDrawer({
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [onClose])
 
-  const tabs = [
-    {
-      id: "status" as TabId,
-      label: "Credentialing Status",
-      icon: Activity,
-      description: "Workflow timeline & current status",
-      badge: localApplication.progressPercentage,
-    },
-    {
-      id: "documents" as TabId,
-      label: "Documents",
-      icon: FileText,
-      description: "Upload & AI extraction",
-      badge: null,
-    },
-    {
-      id: "psv" as TabId,
-      label: "PSV Results",
-      icon: CheckCircle,
-      description: "Primary source verification",
-      badge: null,
-    },
-    {
-      id: "sanctions" as TabId,
-      label: "Sanctions & Exclusions",
-      icon: ShieldCheck,
-      description: "OIG, SAM, NPDB screening",
-      badge: null,
-    },
-    {
-      id: "committee" as TabId,
-      label: "Committee Review",
-      icon: Users,
-      description: "Risk scoring & decision",
-      badge: null,
-    },
-    {
-      id: "recredentialing" as TabId,
-      label: "Re-credentialing",
-      icon: RefreshCcw,
-      description: "3-year cycle management",
-      badge: localApplication.cycleType === "recredentialing" ? "Active" : null,
-    },
-  ]
+  // Use role-based visible tabs with computed badges
+  const tabs = visibleTabs.map((tab) => ({
+    ...tab,
+    badge: tab.getBadge ? tab.getBadge(localApplication) : null,
+  }))
 
   const getStatusBadgeClass = () => {
     switch (localApplication.status) {
@@ -343,12 +314,14 @@ export function CredentialingDetailDrawer({
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="p-6">
-            {/* Workflow Action Bar - Shows available next actions */}
-            <WorkflowActionBar
-              application={localApplication}
-              user={currentUser}
-              onStatusChange={handleStatusChange}
-            />
+            {/* Workflow Action Bar - Shows available next actions (hidden for providers) */}
+            {drawerConfig.showWorkflowActions && (
+              <WorkflowActionBar
+                application={localApplication}
+                user={currentUser}
+                onStatusChange={handleStatusChange}
+              />
+            )}
 
             {activeTab === "status" && (
               <CredentialingStatusTab
@@ -399,9 +372,12 @@ export function CredentialingDetailDrawer({
         <div className="sticky bottom-0 z-10 bg-white border-t border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">Assigned to:</span> {localApplication.assignedTo.split(",")[0]}
-              </div>
+              {/* Show assignment info only for staff views */}
+              {drawerConfig.showAssignment && (
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Assigned to:</span> {localApplication.assignedTo.split(",")[0]}
+                </div>
+              )}
               <div className="text-xs text-gray-500">
                 <span className="font-medium">Your role:</span> {getRoleDisplayName(currentUser.role)}
               </div>
@@ -416,12 +392,18 @@ export function CredentialingDetailDrawer({
               >
                 Close
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors">
-                Export Report
-              </button>
-              <button className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg hover:from-violet-700 hover:to-purple-700 transition-colors shadow-sm">
-                Update Application
-              </button>
+              {/* Export button - hidden from providers */}
+              {drawerConfig.showExport && (
+                <button className="px-4 py-2 text-sm font-medium text-violet-700 bg-violet-50 border border-violet-200 rounded-lg hover:bg-violet-100 transition-colors">
+                  Export Report
+                </button>
+              )}
+              {/* Update button - only for admin/staff views */}
+              {viewMode === "admin" && (
+                <button className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-violet-600 to-purple-600 rounded-lg hover:from-violet-700 hover:to-purple-700 transition-colors shadow-sm">
+                  Update Application
+                </button>
+              )}
             </div>
           </div>
         </div>

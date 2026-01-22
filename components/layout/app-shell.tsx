@@ -76,6 +76,12 @@ const navItems = [
     description: "Manage provider information",
   },
   {
+    name: "Provider Self-Service",
+    href: "/provider-portal",
+    icon: Users,
+    description: "Providers manage their own profiles",
+  },
+  {
     name: "Credentialing (CaaS)",
     href: "/credentialing",
     icon: ShieldCheck,

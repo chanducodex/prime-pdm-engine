@@ -14,9 +14,14 @@ import {
   Eye,
   Sparkles,
   Clock,
+  ThumbsDown,
+  ThumbsUp,
+  Loader2,
+  X,
 } from "lucide-react"
 import type { UserContext } from "@/lib/credentialing-rbac"
 import { hasPermission, CredentialingAction } from "@/lib/credentialing-rbac"
+import { sendCredentialingEmail } from "@/lib/credentialing-email-service"
 
 interface DocumentsUploadTabProps {
   application: CredentialingApplication
@@ -24,12 +29,22 @@ interface DocumentsUploadTabProps {
   currentUser: UserContext
 }
 
-export function DocumentsUploadTab({ application, currentUser }: DocumentsUploadTabProps) {
+export function DocumentsUploadTab({ application, onUpdate, currentUser }: DocumentsUploadTabProps) {
   const [documents, setDocuments] = useState<CredentialingDocument[]>(
     mockCredentialingDocuments.filter((doc) => doc.applicationId === application.id)
   )
   const [showExtractionModal, setShowExtractionModal] = useState(false)
   const [selectedDocument, setSelectedDocument] = useState<CredentialingDocument | null>(null)
+
+  // Rejection modal state
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [rejectingDocument, setRejectingDocument] = useState<CredentialingDocument | null>(null)
+  const [rejectionReason, setRejectionReason] = useState("")
+  const [isRejecting, setIsRejecting] = useState(false)
+
+  // Check permissions
+  const canRejectDocuments = hasPermission(currentUser, CredentialingAction.REJECT_DOCUMENTS)
+  const canApproveDocuments = hasPermission(currentUser, CredentialingAction.APPROVE_DOCUMENTS)
 
   const documentTypes: { type: DocumentType; label: string; required: boolean }[] = [
     { type: "state_license", label: "State Medical License", required: true },
@@ -136,6 +151,90 @@ export function DocumentsUploadTab({ application, currentUser }: DocumentsUpload
         )
       )
     }, 2000)
+  }
+
+  // Handle opening reject modal
+  const handleOpenRejectModal = (doc: CredentialingDocument) => {
+    setRejectingDocument(doc)
+    setRejectionReason("")
+    setShowRejectModal(true)
+  }
+
+  // Handle document rejection
+  const handleRejectDocument = async () => {
+    if (!rejectingDocument || !rejectionReason.trim()) return
+
+    setIsRejecting(true)
+
+    try {
+      // Update document status
+      setDocuments((prev) =>
+        prev.map((doc) =>
+          doc.id === rejectingDocument.id
+            ? {
+                ...doc,
+                status: "rejected" as const,
+                verificationStatus: "discrepancy" as const,
+                notes: `Rejected: ${rejectionReason}`,
+              }
+            : doc
+        )
+      )
+
+      // Send rejection email (using NPI as placeholder for email - in production would lookup actual email)
+      const providerEmail = `provider_${application.providerNPI}@hospital.com`
+      await sendCredentialingEmail({
+        to: providerEmail,
+        providerName: `${application.providerSnapshot.firstName} ${application.providerSnapshot.lastName}`,
+        applicationId: application.id,
+        type: "document_rejected",
+        documentName: rejectingDocument.name,
+        documentType: rejectingDocument.type,
+        rejectionReason: rejectionReason,
+        reuploadDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      })
+
+      // Update application to reflect the change
+      onUpdate({
+        ...application,
+        notes: [
+          ...application.notes,
+          `Document "${rejectingDocument.name}" rejected by ${currentUser.name}: ${rejectionReason}`,
+        ],
+      })
+
+      // Close modal
+      setShowRejectModal(false)
+      setRejectingDocument(null)
+      setRejectionReason("")
+    } catch (error) {
+      console.error("Failed to reject document:", error)
+    } finally {
+      setIsRejecting(false)
+    }
+  }
+
+  // Handle document approval
+  const handleApproveDocument = (doc: CredentialingDocument) => {
+    setDocuments((prev) =>
+      prev.map((d) =>
+        d.id === doc.id
+          ? {
+              ...d,
+              status: "verified" as const,
+              verificationStatus: "verified",
+            }
+          : d
+      )
+    )
+
+    onUpdate({
+      ...application,
+      notes: [
+        ...application.notes,
+        `Document "${doc.name}" approved by ${currentUser.name}`,
+      ],
+    })
   }
 
   return (
@@ -273,6 +372,27 @@ export function DocumentsUploadTab({ application, currentUser }: DocumentsUpload
                           >
                             <Sparkles className="w-4 h-4 inline mr-1" />
                             View Extraction
+                          </button>
+                        )}
+                        {/* Approve/Reject buttons for authorized users */}
+                        {canApproveDocuments && doc.status !== "verified" && doc.status !== "rejected" && (
+                          <button
+                            onClick={() => handleApproveDocument(doc)}
+                            className="px-3 py-2 text-sm font-medium text-green-600 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                            title="Approve document"
+                          >
+                            <ThumbsUp className="w-4 h-4 inline mr-1" />
+                            Approve
+                          </button>
+                        )}
+                        {canRejectDocuments && doc.status !== "verified" && doc.status !== "rejected" && (
+                          <button
+                            onClick={() => handleOpenRejectModal(doc)}
+                            className="px-3 py-2 text-sm font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+                            title="Reject document"
+                          >
+                            <ThumbsDown className="w-4 h-4 inline mr-1" />
+                            Reject
                           </button>
                         )}
                       </>
@@ -476,6 +596,89 @@ export function DocumentsUploadTab({ application, currentUser }: DocumentsUpload
                     </button>
                     <button className="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 transition-colors">
                       Verify Data
+                    </button>
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )
+          : null)}
+
+      {/* Document Rejection Modal */}
+      {showRejectModal && rejectingDocument &&
+        (typeof document !== "undefined" && document.body
+          ? createPortal(
+              <div className="fixed inset-0 z-[100] flex items-center justify-center">
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/50" onClick={() => setShowRejectModal(false)} />
+
+                {/* Dialog */}
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="reject-modal-title"
+                  className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 overflow-hidden animate-in zoom-in-95 duration-200"
+                >
+                  <div className="px-6 py-4 border-b border-gray-200 bg-red-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                          <ThumbsDown className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div>
+                          <h3 id="reject-modal-title" className="text-lg font-semibold text-gray-900">Reject Document</h3>
+                          <p className="text-sm text-gray-600">{rejectingDocument.name}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowRejectModal(false)}
+                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-lg transition-colors"
+                        aria-label="Close"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Reason for Rejection <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder="Please provide a clear reason for rejecting this document..."
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                      rows={4}
+                    />
+                    <p className="text-xs text-gray-500 mt-2">
+                      The provider will receive an email notification with this reason and instructions to re-upload the document.
+                    </p>
+                  </div>
+
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => setShowRejectModal(false)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleRejectDocument}
+                      disabled={!rejectionReason.trim() || isRejecting}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    >
+                      {isRejecting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Rejecting...
+                        </>
+                      ) : (
+                        <>
+                          <ThumbsDown className="w-4 h-4" />
+                          Reject Document
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

@@ -90,6 +90,7 @@ export interface ProviderEditState {
   isDirty: boolean
   addArrayItem: (path: string, item: unknown) => void
   removeArrayItem: (path: string, index: number) => void
+  markAsSaved: () => void
 }
 
 /**
